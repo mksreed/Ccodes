@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define NX 50
-#define NY 50
+#define NX 200
+#define NY 200
 #define NT 200000
 #define PI 3.14159265979323
 
@@ -49,8 +49,8 @@ int main()
     }
 
     // Source
-    int cx = 8;
-    int cy = 8;
+    int cx = 16;
+    int cy = 16;
     b[ny / 4][nx / 4] = 100;
     b[3 * ny / 4][3 * nx / 4] = -100;
     for (int j = 0; j < ny; j++) {
@@ -115,7 +115,7 @@ int main()
     }
 
     meanerr = totalerr / (nx * ny);
-    printf("%f %f %f %f\n", maxerr, meanerr, maxp, maxpexact);
+    printf("%d %d %f %f %f %f\n", nx,ny,maxerr, meanerr, maxp, maxpexact);
 
     return 0;
 }
