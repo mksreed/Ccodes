@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define NX 200
-#define NY 200
+#define NX 100
+#define NY 100
 #define NT 200000
 #define PI 3.14159265979323
 
@@ -101,7 +101,7 @@ int main()
     for (int j = 0; j < ny; j++) {
         for (int i = 0; i < nx; i++) {
             err[j][i] = p[j][i] - pexact[j][i];
-            totalerr += abs(err[j][i]);
+            totalerr += abs(err[j][i])*abs(err[j][i]);
             if (fabs(err[j][i]) > maxerr) {
                 maxerr = fabs(err[j][i]);
             }
