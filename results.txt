@@ -5,3 +5,11 @@ results.txt
 200 200 0.089588 0.000000 1.089526 0.999938
 
 200 200 0.089588 0.000000 1.089526 0.999938
+
+sreedhar@sreedhar-OptiPlex-3010:~/Documents/CFD/Ccodes$ git add .
+sreedhar@sreedhar-OptiPlex-3010:~/Documents/CFD/Ccodes$ git commit -m "second time"
+[main bf1bf1d] second time
+ 3 files changed, 5 insertions(+), 3 deletions(-)
+sreedhar@sreedhar-OptiPlex-3010:~/Documents/CFD/Ccodes$ git push origin main
+
+https://www.codeconvert.ai/python-to-c-converter

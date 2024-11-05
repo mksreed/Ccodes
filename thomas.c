@@ -1,5 +1,8 @@
 #include<stdio.h>
-void cyclic_thomas(const int X, double x[restrict X], const double a[restrict X], 
+#include<math.h>
+#define nx 40
+//--------------------------------------------------------------------------------------
+void cyclic_thomas_2(const int X, double x[restrict X], const double a[restrict X], 
 const double b[restrict X], const double c[restrict X], double tempcmod[restrict X], 
 double v[restrict X]) 
 {
@@ -34,7 +37,128 @@ double v[restrict X])
     for (int ix = 1; ix < X; ix++)
         x[ix] += x[0] * v[ix];
 }
+//--------------------------------------------------------------------------------
+void cyclic_thomas(const int X, double x[restrict X], const double a[restrict X], const double b[restrict X], const double c[restrict X], double cmod[restrict X], double u[restrict X]) {
+    /*
+     solves Ax = v, where A is a cyclic tridiagonal matrix consisting of vectors a, b, c
+     X = number of equations
+     x[] = initially contains the input v, and returns x. indexed from [0, ..., X - 1]
+     a[] = subdiagonal, regularly indexed from [1, ..., X - 1], a[0] is lower left corner
+     b[] = main diagonal, indexed from [0, ..., X - 1]
+     c[] = superdiagonal, regularly indexed from [0, ..., X - 2], c[X - 1] is upper right
+     cmod[], u[] = scratch vectors each of length X
+     */
+
+    /* lower left and upper right corners of the cyclic tridiagonal system respectively */
+    const double alpha = a[0];
+    const double beta = c[X - 1];
+
+    /* arbitrary, but chosen such that division by zero is avoided */
+    const double gamma = -b[0];
+
+    cmod[0] = alpha / (b[0] - gamma);
+    u[0] = gamma / (b[0] - gamma);
+    x[0] /= (b[0] - gamma);
+
+    /* loop from 1 to X - 2 inclusive */
+    for (int ix = 1; ix + 1 < X; ix++) {
+        const double m = 1.0 / (b[ix] - a[ix] * cmod[ix - 1]);
+        cmod[ix] = c[ix] * m;
+        u[ix] = (0.0f  - a[ix] * u[ix - 1]) * m;
+        x[ix] = (x[ix] - a[ix] * x[ix - 1]) * m;
+    }
+
+    /* handle X - 1 */
+    const double m = 1.0 / (b[X - 1] - alpha * beta / gamma - beta * cmod[X - 2]);
+    u[X - 1] = (alpha    - a[X - 1] * u[X - 2]) * m;
+    x[X - 1] = (x[X - 1] - a[X - 1] * x[X - 2]) * m;
+
+    /* loop from X - 2 to 0 inclusive */
+    for (int ix = X - 2; ix >= 0; ix--) {
+        u[ix] -= cmod[ix] * u[ix + 1];
+        x[ix] -= cmod[ix] * x[ix + 1];
+    }
+
+    const double fact = (x[0] + x[X - 1] * beta / gamma) / (1.0 + u[0] + u[X - 1] * beta / gamma);
+
+    /* loop from 0 to X - 1 inclusive */
+    for (int ix = 0; ix < X; ix++)
+        x[ix] -= fact * u[ix];
+}//-------------------------------------------------------------------------------
+void thomas(const int X, double x[restrict X],
+            const double a[restrict X], const double b[restrict X],
+            const double c[restrict X], double scratch[restrict X]) {
+    /*
+     solves Ax = d, where A is a tridiagonal matrix consisting of vectors a, b, c
+     X = number of equations
+     x[] = initially contains the input v, and returns x. indexed from [0, ..., X - 1]
+     a[] = subdiagonal, indexed from [1, ..., X - 1]
+     b[] = main diagonal, indexed from [0, ..., X - 1]
+     c[] = superdiagonal, indexed from [0, ..., X - 2]
+     scratch[] = scratch space of length X, provided by caller, allowing a, b, c to be const
+     not performed in this example: manual expensive common subexpression elimination
+     */
+    scratch[0] = c[0] / b[0];
+    x[0] = x[0] / b[0];
+
+    /* loop from 1 to X - 1 inclusive */
+    for (int ix = 1; ix < X; ix++) {
+        if (ix < X-1){
+        scratch[ix] = c[ix] / (b[ix] - a[ix] * scratch[ix - 1]);
+        }
+        x[ix] = (x[ix] - a[ix] * x[ix - 1]) / (b[ix] - a[ix] * scratch[ix - 1]);
+    }
+
+    /* loop from X - 2 to 0 inclusive */
+    for (int ix = X - 2; ix >= 0; ix--)
+        x[ix] -= scratch[ix] * x[ix + 1];
+}
+//--------------------------------------------------------------------------------------
 int main()
 {
-  printf("\n Started thomas algorithm");
+    FILE * fpout;
+    int i=0,j=0;
+    double pi=3.14159265358979323;
+    double xmax=2*pi;
+    double dx=xmax/(nx-1);
+    double s1=1;
+    printf("\n Started thomas algorithm");
+    double a[nx],b[nx],c[nx],x[nx],d[nx];
+    double ap[nx],bp[nx],cp[nx],xp[nx],dp[nx];
+    double ss1[nx],ss2[nx];
+    fpout=fopen("outfile.txt","w");
+    for (int i=0;i<nx;i++)
+    {
+        x[i]=i*dx;
+        a[i]=1/(dx*dx);
+        b[i]=-2/(dx*dx);
+        c[i]=1/(dx*dx);
+        d[i]=-s1*s1*sin(s1*x[i]);
+        //printf("\n%d,%f,%f,%f,%f,%f",i,x[i],a[i],b[i],c[i],d[i]);
+        ap[i]=a[i];
+        bp[i]=b[i];
+        cp[i]=c[i];
+        dp[i]=d[i];
+    }
+    i=0;
+    a[i]=0;
+    b[i]=1.0;
+    c[i]=0;
+    d[i]=0;
+    //cp[i]=0.*c[i];
+    i=nx-1;
+    a[i]=0;
+    b[i]=1.0;
+    c[i]=0;
+    d[i]=0;
+    //ap[i]=0*a[i];
+    cyclic_thomas_2(nx,dp,ap,bp,cp,ss1,ss2);
+    //thomas(nx,dp,ap,bp,cp,ss1);
+    thomas(nx,d,a,b,c,ss1);
+    fprintf(fpout,"i,x,a,b,c,u,up,ue");
+    for (int i=0;i<=nx-1;i++)
+    {
+        printf("\n%d,%f,%f,%f,%f,%f,%f,%f",i,x[i],a[i],b[i],c[i],d[i],dp[i],sin(s1*x[i]));
+        fprintf(fpout,"\n%d,%f,%f,%f,%f,%f,%f,%f",i,x[i],a[i],b[i],c[i],d[i],dp[i],sin(s1*x[i]));
+    }
 }
