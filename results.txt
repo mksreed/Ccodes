@@ -13,3 +13,11 @@ sreedhar@sreedhar-OptiPlex-3010:~/Documents/CFD/Ccodes$ git commit -m "second ti
 sreedhar@sreedhar-OptiPlex-3010:~/Documents/CFD/Ccodes$ git push origin main
 
 https://www.codeconvert.ai/python-to-c-converter
+
+
+R
+myframe <- data.frame(read.csv("outfile.txt"))
+attach(myframe)
+plot(x,up+0.0)
+lines(x,u)
+lines(x,ue)

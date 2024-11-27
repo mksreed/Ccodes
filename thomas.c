@@ -121,7 +121,7 @@ int main()
     double pi=3.14159265358979323;
     double xmax=2*pi;
     double dx=xmax/(nx-1);
-    double s1=1;
+    double s1=2;
     printf("\n Started thomas algorithm");
     double a[nx],b[nx],c[nx],x[nx],d[nx];
     double ap[nx],bp[nx],cp[nx],xp[nx],dp[nx];
@@ -152,7 +152,8 @@ int main()
     c[i]=0;
     d[i]=0;
     //ap[i]=0*a[i];
-    cyclic_thomas_2(nx,dp,ap,bp,cp,ss1,ss2);
+    cyclic_thomas(nx-1,dp,ap,bp,cp,ss1,ss2);
+    dp[nx-1]=dp[0];
     //thomas(nx,dp,ap,bp,cp,ss1);
     thomas(nx,d,a,b,c,ss1);
     fprintf(fpout,"i,x,a,b,c,u,up,ue");
