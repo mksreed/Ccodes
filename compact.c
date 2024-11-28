@@ -121,7 +121,7 @@ int main()
     double pi=3.14159265358979323;
     double xmax=2*pi;
     double dx=xmax/(nx-1);
-    double s1=1;
+    double s1=8;
     printf("\n Started thomas algorithm");
     double a[nx],b[nx],c[nx],x[nx],d[nx];
     double ap[nx],bp[nx],cp[nx],xp[nx],dp[nx];
@@ -132,7 +132,7 @@ int main()
     {
         x[i]=i*dx;
         u[i]=cos(s1*x[i]);
-        uxe[i]=-s1*sin(x[i]);
+        uxe[i]=-s1*sin(s1*x[i]);
     }
     fpout=fopen("outfile.txt","w");
     for (int i=0;i<nx;i++)
