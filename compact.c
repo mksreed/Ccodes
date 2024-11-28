@@ -127,49 +127,51 @@ int main()
     double ap[nx],bp[nx],cp[nx],xp[nx],dp[nx];
     double aas[nx],bas[nx],cas[nx],xas[nx],das[nx];
     double ss1[nx],ss2[nx];
+    double u[nx],ux[nx],uxe[nx];
+    for(i=0;i<nx;i++)
+    {
+        x[i]=i*dx;
+        u[i]=cos(s1*x[i]);
+        uxe[i]=-s1*sin(x[i]);
+    }
     fpout=fopen("outfile.txt","w");
     for (int i=0;i<nx;i++)
     {
-        x[i]=i*dx;
-        a[i]=1/(dx*dx);
-        b[i]=-2/(dx*dx);
-        c[i]=1/(dx*dx);
-        d[i]=-s1*s1*cos(s1*x[i]);
+        a[i]=1/3.;
+        b[i]=1;
+        c[i]=1/3.;
         //printf("\n%d,%f,%f,%f,%f,%f",i,x[i],a[i],b[i],c[i],d[i]);
         ap[i]=a[i];
         bp[i]=b[i];
         cp[i]=c[i];
-        dp[i]=d[i];
         aas[i]=a[i];
         bas[i]=b[i];
         cas[i]=c[i];
-        das[i]=d[i];
+    }
+    for(i=2;i<nx-2;i++)
+    {
+        d[i]=14./9.*(u[i+1]-u[i-1])/2./dx+1./9.*(u[i+2]-u[i-2])/4./dx;
     }
     i=0;
-    a[i]=0;
-    b[i]=1.0;
-    c[i]=0;
-    d[i]=1;
-    cas[i]=cas[i]-aas[i];
-    //cp[i]=0.*c[i];
+    d[i]=14./9.*(u[i+1]-u[nx-2])/2./dx+1./9.*(u[i+2]-u[nx-3])/4./dx;
+    i=1;
+    d[i]=14./9.*(u[i+1]-u[nx-1])/2./dx+1./9.*(u[i+2]-u[nx-1])/4./dx;
     i=nx-1;
-    aas[i]=aas[i]-cas[i];
-    a[i]=0;
-    b[i]=1.0;
-    c[i]=0;
-    d[i]=1;
-    //ap[i]=0*a[i];
-    cyclic_thomas(nx-1,dp,ap,bp,cp,ss1,ss2);
+    d[i]=14./9.*(u[1]-u[i-1])/2./dx+1./9.*(u[2]-u[i-2])/4./dx;
+    i=nx-2;
+    d[i]=14./9.*(u[0]-u[i-1])/2./dx+1./9.*(u[1]-u[i-2])/4./dx;
+
+    cyclic_thomas(nx-1,d,a,b,c,ss1,ss2);
     dp[nx-1]=dp[0];
     //thomas(nx,dp,ap,bp,cp,ss1);
-    thomas(nx,d,a,b,c,ss1);
-    thomas(nx,das,aas,bas,cas,ss1);
-    fprintf(fpout,"i,x,a,b,c,u,up,ue,uas");
+   // thomas(nx,d,a,b,c,ss1);
+   // thomas(nx,das,aas,bas,cas,ss1);
+    fprintf(fpout,"i,x,a,b,c,ux,u,uxe");
     for (int i=0;i<=nx-1;i++)
     {
-        printf("\n%d,%f,%f,%f,%f,%f,%f,%f,%f",
-                    i,x[i],a[i],b[i],c[i],d[i],dp[i],cos(s1*x[i]),das[i]);
-        fprintf(fpout,"\n%d,%f,%f,%f,%f,%f,%f,%f,%f",
-                    i,x[i],a[i],b[i],c[i],d[i],dp[i],cos(s1*x[i]),das[i]);
+        printf("\n%d,%f,%f,%f,%f,%f,%f,%f",
+                    i,x[i],a[i],b[i],c[i],d[i],u[i],uxe[i]);
+        fprintf(fpout,"\n%d,%f,%f,%f,%f,%f,%f,%f",
+                    i,x[i],a[i],b[i],c[i],d[i],u[i],uxe[i]);
     }
 }
