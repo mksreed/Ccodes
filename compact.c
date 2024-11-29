@@ -126,52 +126,80 @@ int main()
     double a[nx],b[nx],c[nx],x[nx],d[nx];
     double ap[nx],bp[nx],cp[nx],xp[nx],dp[nx];
     double aas[nx],bas[nx],cas[nx],xas[nx],das[nx];
+    double ass[nx],bss[nx],css[nx],xss[nx],dss[nx];
     double ss1[nx],ss2[nx];
     double u[nx],ux[nx],uxe[nx];
     for(i=0;i<nx;i++)
     {
         x[i]=i*dx;
-        u[i]=cos(s1*x[i]);
-        uxe[i]=-s1*sin(s1*x[i]);
+        u[i]=sin(s1*x[i]);
+        uxe[i]= s1*cos(s1*x[i]);
     }
     fpout=fopen("outfile.txt","w");
+    //---------------------------------------------------------
     for (int i=0;i<nx;i++)
     {
         a[i]=1/3.;
         b[i]=1;
         c[i]=1/3.;
-        //printf("\n%d,%f,%f,%f,%f,%f",i,x[i],a[i],b[i],c[i],d[i]);
         ap[i]=a[i];
         bp[i]=b[i];
         cp[i]=c[i];
         aas[i]=a[i];
         bas[i]=b[i];
         cas[i]=c[i];
+        ass[i]=a[i];
+        bss[i]=b[i];
+        css[i]=c[i];
     }
     for(i=2;i<nx-2;i++)
     {
         d[i]=14./9.*(u[i+1]-u[i-1])/2./dx+1./9.*(u[i+2]-u[i-2])/4./dx;
+        dp[i]=d[i];
+        das[i]=d[i];
+        dss[i]=d[i];
     }
     i=0;
-    d[i]=14./9.*(u[i+1]-u[nx-2])/2./dx+1./9.*(u[i+2]-u[nx-3])/4./dx;
+    dp[i] =14./9.*(u[i+1]-u[nx-2])/2./dx+1./9.*(u[i+2]-u[nx-3])/4./dx;
+    dss[i]=14./9.*(u[i+1]-u[1])/2./dx+1./9.*(u[i+2]-u[2])/4./dx;
+    das[i]=14./9.*(u[i+1]+u[1])/2./dx+1./9.*(u[i+2]+u[2])/4./dx;
+    css[i]=css[i]-ass[i];
+    cas[i]=cas[i]+aas[i];
+    ass[i]=0;
+    aas[i]=0;
     i=1;
-    d[i]=14./9.*(u[i+1]-u[nx-1])/2./dx+1./9.*(u[i+2]-u[nx-1])/4./dx;
+    dp[i] =14./9.*(u[i+1]-u[nx-1])/2./dx+1./9.*(u[i+2]-u[nx-2])/4./dx;
+    dss[i]=14./9.*(u[i+1]-u[0  ])/2./dx+1./9.*(u[i+2]-u[1])/4./dx;
+    das[i]=14./9.*(u[i+1]+u[0  ])/2./dx+1./9.*(u[i+2]+u[1])/4./dx;
     i=nx-1;
-    d[i]=14./9.*(u[1]-u[i-1])/2./dx+1./9.*(u[2]-u[i-2])/4./dx;
+    dp[i] =14./9.*(u[1]-   u[i-1])/2./dx+1./9.*(u[2   ]-u[i-2])/4./dx;
+    dss[i]=14./9.*(u[nx-2]-u[i-1])/2./dx+1./9.*(u[nx-3]-u[i-2])/4./dx;
+    das[i]=14./9.*(-u[nx-2]-u[i-1])/2./dx+1./9.*(-u[nx-3]-u[i-2])/4./dx;
+    ass[i]=ass[i]-css[i];
+    aas[i]=aas[i]+cas[i];
+    css[i]=0;
+    cas[i]=0;
     i=nx-2;
-    d[i]=14./9.*(u[0]-u[i-1])/2./dx+1./9.*(u[1]-u[i-2])/4./dx;
-
-    cyclic_thomas(nx-1,d,a,b,c,ss1,ss2);
+    dp[i] =14./9.*(u[0]-u[i-1])/2./dx+1./9.*(u[1]-u[i-2])/4./dx;
+    dss[i]=14./9.*(u[nx-1]-u[i-1])/2./dx+1./9.*(u[nx-2]-u[i-2])/4./dx;
+    das[i]=14./9.*(u[nx-1]-u[i-1])/2./dx+1./9.*(-u[nx-2]-u[i-2])/4./dx;
+    for (int i=0;i<=nx;i++) printf("\n%d,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+        i,u[i],aas[i],bas[i],cas[i],das[i],ap[i],bp[i],cp[i],dp[i]);
+//------------------------------------------------------------
+    thomas(nx,dss,ass,bss,css,ss1);
+    thomas(nx,das,aas,bas,cas,ss2);
+    cyclic_thomas(nx-1,dp,ap,bp,cp,ss1,ss2);
+    //thomas(nx,dss,ass,bss,css,ss1);
     dp[nx-1]=dp[0];
     //thomas(nx,dp,ap,bp,cp,ss1);
    // thomas(nx,d,a,b,c,ss1);
    // thomas(nx,das,aas,bas,cas,ss1);
-    fprintf(fpout,"i,x,a,b,c,ux,u,uxe");
+    fprintf(fpout,"i,x,a,b,c,u,uxp,uxs,uxas,uxe");
     for (int i=0;i<=nx-1;i++)
     {
-        printf("\n%d,%f,%f,%f,%f,%f,%f,%f",
-                    i,x[i],a[i],b[i],c[i],d[i],u[i],uxe[i]);
-        fprintf(fpout,"\n%d,%f,%f,%f,%f,%f,%f,%f",
-                    i,x[i],a[i],b[i],c[i],d[i],u[i],uxe[i]);
+        printf("\n%d,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+                    i,x[i],ass[i],bss[i],css[i],u[i],dp[i],dss[i],das[i],uxe[i]);
+        fprintf(fpout,"\n%d,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+                    i,x[i],a[i],b[i],c[i],u[i],dp[i],dss[i],das[i],uxe[i]);
     }
 }

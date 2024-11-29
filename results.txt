@@ -21,3 +21,7 @@ attach(myframe)
 plot(x,up+0.0)
 lines(x,u)
 lines(x,ue)
+lines(x,uxs,col="red")
+lines(x,uxp,col="blue")
+
+myframe <- data.frame(read.csv("outfile.txt"));attach(myframe);plot(x,uxe)
